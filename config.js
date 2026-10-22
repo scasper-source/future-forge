@@ -46,5 +46,5 @@ window.FF_CONFIG = {
   offlineCache: true,
 
   /* Build identifier shown in the staff panel. */
-  version: "1.2.0"
+  version: "1.2.2"
 };

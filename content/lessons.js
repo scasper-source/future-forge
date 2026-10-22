@@ -145,7 +145,11 @@ window.FF_CONTENT.lessons = {
     moved: "Your example moved the line. The moment that fooled it now falls on the {name} side.",
     notMoved: "The line moved, but that moment still falls on the {name} side. Some conditions take more than one example.",
     yAxis: "differences it noticed but doesn't use",
-    lineLabel: "the line it learned"
+    lineLabel: "the line it learned",
+    deckEmpty: "The white point is this card, as the network sees it. Each call adds a point.",
+    deckTeach: "Your calls so far. Similar cards sit close together; the deck traces a path from one end to the other.",
+    deckJudge: "Trained on {name}'s calls. The white point is this card; its side of the line is the model's call. Hollow = cards it is tested on.",
+    deckJudgeOne: "Trained on your calls. The white point is this card; its side of the line is the model's call. Hollow = cards it has judged."
   },
 
   /* How far the failing frame was from anything the model had seen (vision). */

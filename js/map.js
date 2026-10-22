@@ -218,11 +218,11 @@ window.FF = window.FF || {};
       let p = map.points.find(q => q.id === id);
       const [tx, ty] = coords[i];
       if (!p) {
-        p = { id, label: e.label, phase: e.phase, tx, ty, cx: tx, cy: ty, from: null, start: now, dur: 0, born: now };
+        p = { id, label: e.label, phase: e.phase, test: !!e.test, tx, ty, cx: tx, cy: ty, from: null, start: now, dur: 0, born: now };
         if (opts.enterFrom && !reduced()) { p.cx = opts.enterFrom[0]; p.cy = opts.enterFrom[1]; p.from = [p.cx, p.cy]; p.dur = 520; }
         map.points.push(p);
       } else {
-        p.from = [p.cx, p.cy]; p.start = now; p.dur = dur; p.tx = tx; p.ty = ty; p.phase = e.phase; p.label = e.label;
+        p.from = [p.cx, p.cy]; p.start = now; p.dur = dur; p.tx = tx; p.ty = ty; p.phase = e.phase; p.label = e.label; p.test = !!e.test;
       }
     });
     map.points = map.points.filter(p => seen.has(p.id));
@@ -277,8 +277,9 @@ window.FF = window.FF || {};
 
   function updateAria() {
     if (!map.canvas) return;
-    const nA = map.points.filter(p => p.label === 0).length, nB = map.points.length - nA;
-    let t = "Map of your examples as the model sees them: " + nA + " " + map.names[0] + " (circles) and " + nB + " " + map.names[1] + " (squares).";
+    const train = map.points.filter(p => !p.test), tests = map.points.length - train.length;
+    const nA = train.filter(p => p.label === 0).length, nB = train.length - nA;
+    let t = "Map of your examples as the model sees them: " + nA + " " + map.names[0] + " (circles) and " + nB + " " + map.names[1] + " (squares)." + (tests ? " " + tests + " hollow markers are cards it did not learn from." : "");
     if (map.model) t += " The line the model learned runs down the middle; " + map.names[0] + " to the left, " + map.names[1] + " to the right. Points near the line are the ones it is least sure about.";
     else if (map.points.length) t += " Not trained yet: points are placed by how similar the pictures look to the network.";
     if (map.failure) t += " The moment it went wrong is marked with a ring" + (map.failure.tx > 0 ? " on the " + map.names[1] : " on the " + map.names[0]) + " side.";
@@ -356,7 +357,12 @@ window.FF = window.FF || {};
       const age = Math.min(1, (now - p.born) / 400);
       ctx.globalAlpha = reduced() ? 1 : 0.35 + 0.65 * age;
       ctx.fillStyle = p.label ? P.b : P.a;
-      if (p.label) ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
+      if (p.test) {
+        // A card the model did not learn from: hollow, in the colour of the call it was given.
+        ctx.strokeStyle = p.label ? P.b : P.a; ctx.lineWidth = 2.5;
+        if (p.label) ctx.strokeRect(x - r + 1, y - r + 1, 2 * r - 2, 2 * r - 2);
+        else { ctx.beginPath(); ctx.arc(x, y, r - 1, 0, Math.PI * 2); ctx.stroke(); }
+      } else if (p.label) ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
       else { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
       if (p.phase === "improve") { ctx.strokeStyle = P.ink; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, r + 5, 0, Math.PI * 2); ctx.stroke(); }
       ctx.globalAlpha = 1;

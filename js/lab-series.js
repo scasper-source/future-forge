@@ -23,6 +23,55 @@
   const S = () => app.state.series;
   const deck = () => (FF_CONTENT.series || []).find(d => d.id === app.state.kit) || FF_CONTENT.series[0];
   const endName = i => deck().ends[i].name;
+  const map = FF.map;
+  const LM = FF_CONTENT.lessons.map || {};
+
+  /* ---------------- the map in deck mode ----------------
+   * One point per card (the mean of its burst), coloured by the call it was given.
+   * Cards the model did not learn from (the other sorter's, or the judging pass) are hollow.
+   * The live white point is the card under the camera right now. */
+  function meanFeat(list) {
+    const d = list[0].length, m = new Float32Array(d);
+    list.forEach(f => { for (let i = 0; i < d; i++) m[i] += f[i] / list.length; });
+    return m;
+  }
+  function mapExamples() {
+    const s = S(), out = [];
+    const sides = s.sorters === 2 ? ["A", "B"] : ["A"];
+    sides.forEach(side => cards().forEach(c => {
+      const lab = s.labels[side][c], caps = s.captures[side][c];
+      if ((lab === 0 || lab === 1) && caps && caps.length) out.push({ features: meanFeat(caps), label: lab, shot: side + c, mapPoint: true, test: !!s.trainedOn && side !== s.trainedOn });
+    }));
+    if (s.sorters === 1 && s.model && s.model.kind === "logistic") cards().forEach(c => {
+      const caps = s.captures.T[c];
+      if (caps && caps.length) { const f = meanFeat(caps); out.push({ features: f, label: s.model.predict(f).p >= 0.5 ? 1 : 0, shot: "T" + c, mapPoint: true, test: true }); }
+    });
+    return out;
+  }
+  let liveFeatures = null;
+  function refreshMap(opts) {
+    const s = S();
+    map.setNames(endName(0), endName(1));
+    map.setExamples(mapExamples(), s.model && s.model.kind === "logistic" ? s.model : null, opts || {});
+  }
+  function mapCaption() {
+    const s = S();
+    if (!s.model || s.model.kind !== "logistic") map.caption(mapExamples().length ? (LM.deckTeach || "") : (LM.deckEmpty || ""));
+    else if (s.sorters === 2) map.caption((LM.deckJudge || "").replace("{name}", "Sorter " + s.trainedOn));
+    else map.caption(LM.deckJudgeOne || "");
+  }
+  function mountMap(screenId) {
+    const s = S();
+    map.mount($(screenId));
+    if (s.mapAnimate) { s.mapAnimate = false; refreshMap({ animate: true, duration: 1400 }); }
+    else refreshMap();
+    mapCaption();
+    vision.loadModel().then(() => {
+      vision.startLoop(cap => { liveFeatures = cap.features; map.setLive(cap.features); }, 150);
+    }).catch(() => {});
+  }
+  function leaveMap() { vision.stopLoop(); map.clearLive(); liveFeatures = null; }
+  function enterFromLive() { return map.live && map.live.tx != null ? [map.live.cx, map.live.cy] : null; }
 
   function mountCam(screenId) {
     app.mountInto(camHolder, $(screenId), "cam-slot");
@@ -142,7 +191,9 @@
       if (!S()) { app.show("screen-series-setup", { noPush: true }); return; }
       mountCam("screen-series-label");
       renderLabel();
+      mountMap("screen-series-label");
     },
+    onLeave() { leaveMap(); },
     onKey(e) {
       if (e.key === "1") { e.preventDefault(); labelCard(0); }
       else if (e.key === "2") { e.preventDefault(); labelCard(1); }
@@ -160,6 +211,8 @@
     const caps = await vision.burst(cfg.burstFrames || 3);
     s.captures[s.current][c] = caps.map(x => x.features);
     s.labels[s.current][c] = label;
+    refreshMap({ enterFrom: enterFromLive() });
+    mapCaption();
     app.announce("Card " + c + ": " + endName(label) + ".");
     $("btn-series-end-0").disabled = $("btn-series-end-1").disabled = false;
     labelBusy = false;
@@ -170,6 +223,7 @@
   $("btn-series-skip").addEventListener("click", () => {
     const s = S(), c = currentCard();
     s.labels[s.current][c] = null; delete s.captures[s.current][c];
+    refreshMap();
     app.announce("Card " + c + " skipped.");
     advance();
   });
@@ -180,6 +234,7 @@
     const c = currentCard();
     delete s.labels[s.current][c]; delete s.captures[s.current][c];
     renderLabel();
+    refreshMap(); mapCaption();
     app.announce("Card " + c + " undone. Label it again.");
   });
 
@@ -196,6 +251,7 @@
         doneTitle: "Trained."
       });
       trainOn("A");
+      s.mapAnimate = true;   // the next map screen shows the points finding the line
       if (s.sorters === 2) { s.current = "B"; s.idx = 0; app.show("screen-series-interstitial", { noFocus: false }); }
       else { s.idx = 0; app.show("screen-series-interstitial"); }
     } else {
@@ -250,7 +306,9 @@
       meter.mount($("screen-series-test"));
       meter.setNames(endName(0), endName(1));
       renderTest();
+      mountMap("screen-series-test");
     },
+    onLeave() { leaveMap(); },
     onKey(e) { if (e.key === "Enter") { e.preventDefault(); $("btn-series-judge").click(); } }
   });
   $("btn-series-judge").addEventListener("click", async () => {
@@ -262,6 +320,7 @@
       s.captures.T[c] = caps.map(x => x.features);
       const p = predictCard("T", c);
       meter.set(p == null ? 0.5 : p);
+      refreshMap({ enterFrom: enterFromLive() });
       app.announce("Card " + c + ": model says " + meter.text(p == null ? 0.5 : p) + ".");
       judged = true;
       $("btn-series-judge").disabled = false;

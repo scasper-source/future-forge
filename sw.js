@@ -4,7 +4,7 @@
  * Bump CACHE when files change so visitors get the new version.
  * Not used when opened from a local file (file://); it isn't needed there.
  */
-const CACHE = "future-forge-v1.2.1";
+const CACHE = "future-forge-v1.2.2";
 const FILES = [
   "./", "./index.html", "./styles.css", "./app.js", "./config.js", "./manifest.webmanifest",
   "./content/domains.js", "./content/lessons.js", "./content/challenge-cards.js", "./content/series.js",
