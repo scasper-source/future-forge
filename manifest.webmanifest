@@ -1,0 +1,16 @@
+{
+  "name": "Future Forge — Teach. Test. Break. Build.",
+  "short_name": "Future Forge",
+  "description": "Teach a machine-learning model, try to break it, make it better. A Clarkson University AI Institute open-house experience.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#062b21",
+  "theme_color": "#062b21",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

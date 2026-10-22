@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#062b21">
+  <title>Future Forge 1.2 — Teach. Test. Break. Build.</title>
+  <meta name="description" content="Teach a machine-learning model, try to break it, make it better. A Clarkson University AI Institute open-house experience.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="sr-only" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" title="Placeholder wordmark — pending Clarkson brand approval">CLARKSON · AI INSTITUTE</span>
+    <span class="brand-name">FUTURE FORGE</span>
+    <span class="brand-sub">Teach. Test. Break. Build.</span>
+  </div>
+  <ol class="steps" id="steps" aria-label="Progress">
+    <li data-step="choose">Choose</li>
+    <li data-step="teach">Teach</li>
+    <li data-step="test">Test</li>
+    <li data-step="break">Break</li>
+    <li data-step="improve">Improve</li>
+    <li data-step="build">Build</li>
+  </ol>
+  <div class="row" id="reset-area">
+    <button type="button" class="btn btn-quiet" id="btn-reset" hidden>Reset</button>
+    <span class="confirm" id="reset-confirm" hidden>
+      <span class="small">Start over for the next visitor?</span>
+      <button type="button" class="btn btn-danger" id="btn-reset-yes" style="min-height:44px">Yes, reset</button>
+      <button type="button" class="btn btn-quiet" id="btn-reset-no">Keep going</button>
+    </span>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ HOOK ============ -->
+  <section class="screen center" id="screen-hook" data-step="" aria-labelledby="h-hook">
+    <canvas class="attract-canvas" id="attract-canvas" aria-hidden="true"></canvas>
+    <p class="attract" id="attract" aria-hidden="true"><span>TEACH.</span><span>TEST.</span><span>BREAK.</span><span>BUILD.</span></p>
+    <h1 class="hero-title" id="h-hook" tabindex="-1">DON'T JUST <span class="accent">USE</span> AI.<br>TEACH IT.</h1>
+    <p class="lead">Train a tiny model. Try to break it. Make it better. Then see where you could take it next.</p>
+    <div class="actions center">
+      <button type="button" class="btn btn-primary btn-huge" id="btn-start">Start</button>
+    </div>
+    <p class="hook-facts"><span>No account</span><span>·</span><span>No data saved</span><span>·</span><span>Camera optional</span><span>·</span><span>No AI subscription required</span></p>
+    <p class="small">About 3 minutes.</p>
+    <p class="small" id="hook-tally" hidden></p>
+  </section>
+
+  <!-- ============ DOMAIN ============ -->
+  <section class="screen" id="screen-domain" data-step="choose" aria-labelledby="h-domain" hidden>
+    <h1 id="h-domain" tabindex="-1">Choose a future you care about.</h1>
+    <p class="lead">AI belongs in all of these. Pick the one that's yours.</p>
+    <div class="choice-grid" id="domain-grid"></div>
+    <div class="actions">
+      <button type="button" class="btn btn-quiet" data-back>← Back</button>
+    </div>
+  </section>
+
+  <!-- ============ MODE ============ -->
+  <section class="screen" id="screen-mode" data-step="choose" aria-labelledby="h-mode" hidden>
+    <h1 id="h-mode" tabindex="-1">Choose how you'll build.</h1>
+    <p class="lead">Both teach the same thing. Pick the one you like.</p>
+    <div class="choice-grid">
+      <button type="button" class="choice two" id="btn-mode-vision">
+        <span class="choice-title"><span class="icon" aria-hidden="true">📷</span>Live Vision Lab</span>
+        <span class="choice-sub">Teach it with real objects under the camera. Then fool it.</span>
+        <span class="choice-sub" id="mode-vision-note"></span>
+      </button>
+      <button type="button" class="choice two" id="btn-mode-data">
+        <span class="choice-title"><span class="icon" aria-hidden="true">📈</span>Accessible Data Lab</span>
+        <span class="choice-sub">Teach it with sensor readings. No camera. Keyboard, touch or mouse.</span>
+        <span class="choice-sub">Most real-world AI runs on measurements, not photos.</span>
+      </button>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-quiet" data-back>← Back</button>
+    </div>
+  </section>
+
+  <!-- ============ VISION: SETUP ============ -->
+  <section class="screen" id="screen-vision-setup" data-step="teach" aria-labelledby="h-vision-setup" hidden>
+    <h1 id="h-vision-setup" tabindex="-1">Set up the camera.</h1>
+    <div class="lab">
+      <div>
+        <div class="cam-slot"></div>
+        <p class="privacy" style="margin-top:10px"><span class="icon" aria-hidden="true">🔒</span><span id="privacy-line-1"></span></p>
+      </div>
+      <div class="stack">
+        <p class="lead" id="cam-aim"></p>
+        <div id="cam-controls" class="stack">
+          <button type="button" class="btn btn-primary btn-big" id="btn-cam-on">Turn on camera</button>
+          <div class="notice" id="cam-error" hidden role="status"></div>
+          <button type="button" class="btn btn-secondary" id="btn-cam-to-data" hidden>Use the Data Lab instead</button>
+        </div>
+        <div id="kit-choice" class="stack" hidden>
+          <h2>What will you teach it with?</h2>
+          <div class="choice-grid" id="kit-grid"></div>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-quiet" data-back>← Back</button>
+    </div>
+  </section>
+
+  <!-- ============ VISION: TEACH ============ -->
+  <section class="screen" id="screen-vision-teach" data-step="teach" aria-labelledby="h-vision-teach" hidden>
+    <h1 id="h-vision-teach" tabindex="-1">Teach it. Show it two kinds of things.</h1>
+    <p class="lead" id="vision-teach-hint"></p>
+    <div class="lab">
+      <div class="cam-slot"></div>
+      <div class="stack">
+        <div class="map-slot"></div>
+        <div class="class-panels">
+          <div class="class-panel a">
+            <div class="class-head">
+              <span class="class-badge a" aria-hidden="true">●</span>
+              <label class="sr-only" for="class-a-name">Name of pile A (optional)</label>
+              <input class="class-name" id="class-a-name" value="A" maxlength="18" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="thumbs" id="thumbs-a" aria-hidden="true"></div>
+            <p class="class-count" id="count-a" aria-live="polite">0 examples</p>
+            <button type="button" class="btn btn-a" id="btn-add-a">Add example to A <span class="kbd">A</span></button>
+          </div>
+          <div class="class-panel b">
+            <div class="class-head">
+              <span class="class-badge b" aria-hidden="true">■</span>
+              <label class="sr-only" for="class-b-name">Name of pile B (optional)</label>
+              <input class="class-name" id="class-b-name" value="B" maxlength="18" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="thumbs" id="thumbs-b" aria-hidden="true"></div>
+            <p class="class-count" id="count-b" aria-live="polite">0 examples</p>
+            <button type="button" class="btn btn-b" id="btn-add-b">Add example to B <span class="kbd">B</span></button>
+          </div>
+        </div>
+        <p class="small" id="vision-train-note"></p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-vision-train" disabled>Train <span class="kbd">Enter</span></button>
+          <button type="button" class="btn btn-quiet" id="btn-vision-clear">Clear examples</button>
+          <button type="button" class="btn btn-quiet" data-back>← Back</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VISION: TEST ============ -->
+  <section class="screen" id="screen-vision-test" data-step="test" aria-labelledby="h-vision-test" hidden>
+    <h1 id="h-vision-test" tabindex="-1">Now test it. Show it something.</h1>
+    <p class="lead" id="vision-test-lead"></p>
+    <div class="lab">
+      <div class="cam-slot"></div>
+      <div class="stack">
+        <div class="meter-slot"></div>
+        <div class="map-slot"></div>
+        <p class="small" id="vision-test-hint"></p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-to-break">Try to break it →</button>
+          <button type="button" class="btn btn-secondary" id="btn-test-more-examples">Add more examples</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VISION: BREAK ============ -->
+  <section class="screen" id="screen-vision-break" data-step="break" aria-labelledby="h-vision-break" hidden>
+    <h1 id="h-vision-break" tabindex="-1">Break it.</h1>
+    <p class="lead" id="vision-break-lead"></p>
+    <div class="lab">
+      <div class="cam-slot"></div>
+      <div class="stack">
+        <div class="meter-slot"></div>
+        <div class="map-slot"></div>
+        <p class="small">When you see it go wrong or unsure, say so. You're the judge.</p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-declare-fail">It's wrong or unsure <span class="kbd">Enter</span></button>
+          <button type="button" class="btn btn-secondary" id="btn-cant-break">I can't break it</button>
+        </div>
+        <div class="panel quiet" id="break-stuck" hidden>
+          <p id="break-stuck-text"></p>
+          <div class="actions" style="margin-top:6px">
+            <button type="button" class="btn btn-secondary" id="btn-skip-break">Move on without a failure</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ UNDERSTAND (shared) ============ -->
+  <section class="screen" id="screen-understand" data-step="break" aria-labelledby="h-understand" hidden>
+    <p class="gold" style="font-weight:800" id="understand-praise"></p>
+    <h1 id="h-understand" tabindex="-1">What changed?</h1>
+    <div class="understand-grid">
+      <div class="snapshot" id="understand-snapshot"></div>
+      <div class="map-slot"></div>
+    </div>
+    <p class="lead" id="understand-evidence" hidden></p>
+    <p class="lead">You saw it happen. Why do you think it got that wrong, or unsure?</p>
+    <div class="chips" id="reason-chips" role="group" aria-label="What changed"></div>
+    <p class="panel quiet" id="reason-reflection" hidden aria-live="polite"></p>
+    <div class="actions">
+      <button type="button" class="btn btn-primary btn-big" id="btn-to-improve">Make it better →</button>
+    </div>
+  </section>
+
+  <!-- ============ VISION: IMPROVE ============ -->
+  <section class="screen" id="screen-vision-improve" data-step="improve" aria-labelledby="h-vision-improve" hidden>
+    <h1 id="h-vision-improve" tabindex="-1">Add one hard example.</h1>
+    <p class="lead" id="vision-improve-lead"></p>
+    <div class="lab">
+      <div class="cam-slot"></div>
+      <div class="stack">
+        <div class="meter-slot"></div>
+        <div class="map-slot"></div>
+        <div id="improve-step-add" class="stack">
+          <div class="row">
+            <button type="button" class="btn btn-a btn-big" id="btn-improve-add-a">It's A <span class="kbd">A</span></button>
+            <button type="button" class="btn btn-b btn-big" id="btn-improve-add-b">It's B <span class="kbd">B</span></button>
+          </div>
+          <p class="small" id="improve-added" aria-live="polite"></p>
+          <div class="actions">
+            <button type="button" class="btn btn-primary btn-big" id="btn-retrain" disabled>Retrain <span class="kbd">Enter</span></button>
+          </div>
+        </div>
+        <div id="improve-step-test" class="stack" hidden>
+          <p class="lead" id="improve-test-lead"></p>
+          <div class="actions">
+            <button type="button" class="btn btn-primary btn-big" id="btn-improve-better">Better</button>
+            <button type="button" class="btn btn-secondary" id="btn-improve-still">Still fooled</button>
+          </div>
+          <div class="panel quiet" id="improve-still-box" hidden>
+            <p id="improve-still-text"></p>
+            <div class="actions" style="margin-top:6px">
+              <button type="button" class="btn btn-secondary" id="btn-improve-add-another">Add another example</button>
+              <button type="button" class="btn btn-primary" id="btn-improve-move-on">Move on</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DATA: TEACH ============ -->
+  <section class="screen" id="screen-data-teach" data-step="teach" aria-labelledby="h-data-teach" hidden>
+    <h1 id="h-data-teach" tabindex="-1">Teach it with readings.</h1>
+    <p class="lead" id="data-intro"></p>
+    <div class="datalab">
+      <div class="stack">
+        <div class="chart-slot"></div>
+        <div class="row between">
+          <p class="small" id="data-count" aria-live="polite">No readings yet.</p>
+          <button type="button" class="btn btn-quiet" id="btn-data-table-toggle" aria-expanded="false" aria-controls="data-table-wrap">Show as table</button>
+        </div>
+        <div id="data-table-wrap" hidden></div>
+      </div>
+      <div class="stack">
+        <button type="button" class="btn btn-secondary btn-big" id="btn-data-starter">Load starter readings</button>
+        <div class="panel stack">
+          <h2 style="font-size:1.2em">Add a reading</h2>
+          <div class="field">
+            <span class="lbl" id="lbl-data-class">Label</span>
+            <div class="seg" role="group" aria-labelledby="lbl-data-class">
+              <button type="button" class="a" id="seg-class-0" aria-pressed="true">●</button>
+              <button type="button" class="b" id="seg-class-1" aria-pressed="false">■</button>
+            </div>
+          </div>
+          <div class="field" id="field-teach-x"></div>
+          <div class="field" id="field-teach-y"></div>
+          <button type="button" class="btn btn-primary" id="btn-data-add">Add reading</button>
+        </div>
+        <p class="small" id="data-train-note"></p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-data-train" disabled>Train <span class="kbd">Enter</span></button>
+          <button type="button" class="btn btn-quiet" id="btn-data-clear">Clear readings</button>
+          <button type="button" class="btn btn-quiet" data-back>← Back</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DATA: TEST ============ -->
+  <section class="screen" id="screen-data-test" data-step="test" aria-labelledby="h-data-test" hidden>
+    <h1 id="h-data-test" tabindex="-1">Now test it. Set a new reading.</h1>
+    <p class="lead" id="data-test-lead"></p>
+    <div class="datalab">
+      <div class="stack">
+        <div class="chart-slot"></div>
+        <p class="small" id="data-test-chart-text" aria-live="off"></p>
+      </div>
+      <div class="stack">
+        <div class="meter-slot"></div>
+        <p class="evidence" id="data-evidence" aria-live="polite"></p>
+        <div class="panel stack">
+          <div class="field" id="field-test-x"></div>
+          <div class="field" id="field-test-y"></div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-data-to-break">Try to break it →</button>
+          <button type="button" class="btn btn-secondary" id="btn-data-more">Add more readings</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DATA: BREAK ============ -->
+  <section class="screen" id="screen-data-break" data-step="break" aria-labelledby="h-data-break" hidden>
+    <h1 id="h-data-break" tabindex="-1">Break it.</h1>
+    <p class="lead" id="data-break-lead"></p>
+    <div class="datalab">
+      <div class="stack">
+        <div class="chart-slot"></div>
+      </div>
+      <div class="stack">
+        <div class="meter-slot"></div>
+        <p class="evidence" id="data-break-evidence" aria-live="polite"></p>
+        <div class="panel stack">
+          <div class="field" id="field-break-x"></div>
+          <div class="field" id="field-break-y"></div>
+        </div>
+        <p class="small">When it looks wrong or unsure, say so. You're the judge.</p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-data-declare-fail">It's wrong or unsure <span class="kbd">Enter</span></button>
+          <button type="button" class="btn btn-secondary" id="btn-data-hint">Give me a hint</button>
+          <button type="button" class="btn btn-quiet" id="btn-data-skip-break">Move on without a failure</button>
+        </div>
+        <p class="panel quiet" id="data-hint-text" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DATA: IMPROVE ============ -->
+  <section class="screen" id="screen-data-improve" data-step="improve" aria-labelledby="h-data-improve" hidden>
+    <h1 id="h-data-improve" tabindex="-1">Add the missing example.</h1>
+    <p class="lead" id="data-improve-lead"></p>
+    <div class="datalab">
+      <div class="stack">
+        <div class="chart-slot"></div>
+      </div>
+      <div class="stack">
+        <div id="data-improve-add" class="stack">
+          <p id="data-improve-point" class="panel quiet"></p>
+          <div class="row">
+            <button type="button" class="btn btn-a btn-big" id="btn-data-improve-0"></button>
+            <button type="button" class="btn btn-b btn-big" id="btn-data-improve-1"></button>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-primary btn-big" id="btn-data-retrain" disabled>Retrain <span class="kbd">Enter</span></button>
+          </div>
+        </div>
+        <div id="data-improve-test" class="stack" hidden>
+          <div class="meter-slot"></div>
+          <p class="evidence" id="data-improve-evidence" aria-live="polite"></p>
+          <p class="lead" id="data-improve-result"></p>
+          <div class="actions">
+            <button type="button" class="btn btn-primary btn-big" id="btn-data-better">Better</button>
+            <button type="button" class="btn btn-secondary" id="btn-data-still">Still fooled</button>
+          </div>
+          <div class="panel quiet" id="data-still-box" hidden>
+            <p id="data-still-text"></p>
+            <div class="actions" style="margin-top:6px">
+              <button type="button" class="btn btn-secondary" id="btn-data-add-another">Add another reading</button>
+              <button type="button" class="btn btn-primary" id="btn-data-move-on">Move on</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERIES: SETUP ============ -->
+  <section class="screen" id="screen-series-setup" data-step="teach" aria-labelledby="h-series-setup" hidden>
+    <h1 id="h-series-setup" tabindex="-1"></h1>
+    <p class="lead" id="series-setup-intro"></p>
+    <div class="lab">
+      <div class="cam-slot"></div>
+      <div class="stack">
+        <div class="panel quiet"><strong id="series-deck-name"></strong><br><span class="small" id="series-deck-note"></span></div>
+        <h2 style="font-size:1.2em">How many sorters?</h2>
+        <div class="choice-grid">
+          <button type="button" class="choice" id="btn-sorters-2" aria-pressed="true">
+            <span class="choice-title" id="series-two-title"></span>
+            <span class="choice-sub" id="series-two-note"></span>
+          </button>
+          <button type="button" class="choice" id="btn-sorters-1" aria-pressed="false">
+            <span class="choice-title" id="series-one-title"></span>
+            <span class="choice-sub" id="series-one-note"></span>
+          </button>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-series-begin"></button>
+          <button type="button" class="btn btn-quiet" data-back>← Back</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERIES: LABEL (sorter A or B) ============ -->
+  <section class="screen" id="screen-series-label" data-step="teach" aria-labelledby="h-series-label" hidden>
+    <h1 id="h-series-label" tabindex="-1"></h1>
+    <div class="lab">
+      <div class="cam-slot"></div>
+      <div class="stack">
+        <div class="card-number" id="series-card-number" aria-hidden="true"></div>
+        <p class="lead" id="series-card-prompt"></p>
+        <div class="progress-dots" id="series-dots" aria-hidden="true"></div>
+        <p class="small" id="series-progress" aria-live="polite"></p>
+        <div class="series-buttons">
+          <button type="button" class="btn btn-a btn-big" id="btn-series-end-0"></button>
+          <button type="button" class="btn btn-b btn-big" id="btn-series-end-1"></button>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn btn-quiet" id="btn-series-skip">Skip this card</button>
+          <button type="button" class="btn btn-quiet" id="btn-series-undo" disabled>Undo last card</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERIES: INTERSTITIAL ============ -->
+  <section class="screen center" id="screen-series-interstitial" data-step="test" aria-labelledby="h-series-inter" hidden>
+    <h1 id="h-series-inter" tabindex="-1"></h1>
+    <p class="lead" id="series-inter-text"></p>
+    <div class="actions center">
+      <button type="button" class="btn btn-primary btn-huge" id="btn-series-inter-go"></button>
+    </div>
+  </section>
+
+  <!-- ============ SERIES: TEST (single sorter) ============ -->
+  <section class="screen" id="screen-series-test" data-step="test" aria-labelledby="h-series-test" hidden>
+    <h1 id="h-series-test" tabindex="-1"></h1>
+    <div class="lab">
+      <div class="cam-slot"></div>
+      <div class="stack">
+        <div class="card-number" id="series-test-number" aria-hidden="true"></div>
+        <p class="lead" id="series-test-prompt"></p>
+        <div class="meter-slot"></div>
+        <p class="small" id="series-test-progress" aria-live="polite"></p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-series-judge"></button>
+          <button type="button" class="btn btn-quiet" id="btn-series-test-skip">Skip this card</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERIES: REVEAL ============ -->
+  <section class="screen" id="screen-series-reveal" data-step="break" aria-labelledby="h-series-reveal" hidden>
+    <h1 id="h-series-reveal" class="medium" tabindex="-1"></h1>
+    <div class="stack">
+      <div id="series-chart-wrap"></div>
+      <div class="legend" id="series-legend"></div>
+      <div class="reveal-bottom">
+        <div>
+          <p class="lead" id="series-reveal-text" style="max-width:60ch"></p>
+          <button type="button" class="btn btn-quiet" id="btn-series-table-toggle" aria-expanded="false" aria-controls="series-table-wrap">Show as table</button>
+        </div>
+        <div class="actions" style="margin-top:0">
+          <button type="button" class="btn btn-secondary" id="btn-series-swap" hidden></button>
+          <button type="button" class="btn btn-secondary" id="btn-series-improve"></button>
+          <button type="button" class="btn btn-primary btn-big" id="btn-series-lesson">What you just did →</button>
+        </div>
+      </div>
+      <div id="series-table-wrap" hidden></div>
+    </div>
+  </section>
+
+  <!-- ============ SERIES: IMPROVE ============ -->
+  <section class="screen" id="screen-series-improve" data-step="improve" aria-labelledby="h-series-improve" hidden>
+    <h1 id="h-series-improve" tabindex="-1"></h1>
+    <p class="lead" id="series-improve-intro"></p>
+    <div class="lab">
+      <div class="cam-slot"></div>
+      <div class="stack">
+        <div class="field">
+          <label for="series-improve-card">Which card?</label>
+          <div class="row" id="series-improve-cards"></div>
+        </div>
+        <div class="series-buttons">
+          <button type="button" class="btn btn-a btn-big" id="btn-series-imp-0"></button>
+          <button type="button" class="btn btn-b btn-big" id="btn-series-imp-1"></button>
+        </div>
+        <p class="small" id="series-improve-status" aria-live="polite"></p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary btn-big" id="btn-series-retrain" disabled>Retrain <span class="kbd">Enter</span></button>
+        </div>
+        <div class="panel quiet" id="series-improve-result" hidden>
+          <p id="series-improve-result-text"></p>
+          <div class="actions" style="margin-top:6px">
+            <button type="button" class="btn btn-secondary" id="btn-series-back-to-reveal">See the picture again</button>
+            <button type="button" class="btn btn-primary" id="btn-series-imp-lesson">What you just did →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LESSON ============ -->
+  <section class="screen center" id="screen-lesson" data-step="build" aria-labelledby="h-lesson" hidden>
+    <h1 id="h-lesson" tabindex="-1">What you just did.</h1>
+    <div class="concepts" id="concepts"></div>
+    <p class="lead" id="lesson-close" style="margin-top:18px; font-weight:700; color:var(--ink)"></p>
+    <p class="small" id="lesson-scale" style="max-width:52ch"></p>
+    <div class="actions center">
+      <button type="button" class="btn btn-primary btn-big" id="btn-to-connect">See where this goes →</button>
+    </div>
+  </section>
+
+  <!-- ============ CONNECT ============ -->
+  <section class="screen center" id="screen-connect" data-step="build" aria-labelledby="h-connect" hidden>
+    <img class="backdrop" id="connect-backdrop" alt="" hidden>
+    <div class="recap" id="recap" hidden></div>
+    <p class="lead" id="closing-lead" style="font-weight:800; color:var(--ink)"></p>
+    <div class="closing-lines" id="closing-lines"></div>
+    <p class="lead" id="closing-loop" style="margin-top:18px"></p>
+    <h1 class="belong" id="h-connect" tabindex="-1"></h1>
+    <p class="small" id="closing-trust" style="max-width:52ch"></p>
+    <div class="panel stack" id="idea-box" style="width:100%; max-width:900px; text-align:left">
+      <label for="idea-input" id="idea-label" style="font-weight:700"></label>
+      <textarea id="idea-input" rows="2" maxlength="140" style="font:inherit; font-size:1.05em; padding:12px; border-radius:12px; border:2px solid var(--green-600); background:var(--green-800); color:var(--ink); resize:vertical;"></textarea>
+      <p class="small" id="idea-privacy"></p>
+      <div class="actions" style="margin-top:0">
+        <button type="button" class="btn btn-primary btn-big" id="btn-make-challenge">Make my challenge</button>
+        <button type="button" class="btn btn-secondary" id="btn-skip-idea">Skip</button>
+      </div>
+    </div>
+    <div id="challenge-card" class="card" hidden aria-live="polite"></div>
+    <div class="actions center" id="connect-actions" hidden>
+      <button type="button" class="btn btn-primary btn-big" id="btn-to-finish">Finish →</button>
+    </div>
+  </section>
+
+  <!-- ============ FINISH ============ -->
+  <section class="screen center" id="screen-finish" data-step="build" aria-labelledby="h-finish" hidden>
+    <h1 id="h-finish" tabindex="-1"></h1>
+    <div class="tally" id="tally" hidden>
+      <canvas class="futures-field" id="futures-field" role="img"></canvas>
+      <div id="tally-text"></div>
+    </div>
+    <p class="lead" id="tally-close" hidden></p>
+    <p class="lead" style="font-weight:800; color:var(--ink)">Can you train it better this time?</p>
+    <div class="choice-grid" style="max-width:1100px">
+      <button type="button" class="choice" id="btn-replay-same"><span class="choice-title">Play again</span><span class="choice-sub">Same lab, new examples. Try a different way to fool it.</span></button>
+      <button type="button" class="choice" id="btn-replay-switch"><span class="choice-title" id="replay-switch-title">Switch labs</span><span class="choice-sub" id="replay-switch-sub"></span></button>
+      <button type="button" class="choice" id="btn-replay-domain"><span class="choice-title">New future</span><span class="choice-sub">Pick a different field and start from the top.</span></button>
+    </div>
+    <div class="actions center">
+      <button type="button" class="btn btn-secondary" id="btn-finish-reset">Done — reset for the next visitor</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <span id="footer-privacy">No account · Nothing saved · Camera stays in this browser</span>
+  <span class="footer-right">
+    <span id="footer-version" class="footer-version"></span>
+    <button type="button" class="btn btn-quiet" id="btn-staff" aria-haspopup="dialog">Staff</button>
+  </span>
+</footer>
+
+<!-- Shared, movable pieces -->
+<div id="cam-holder" class="cam-wrap" hidden>
+  <video id="cam" autoplay playsinline muted aria-label="Live camera view of the table"></video>
+  <div class="cam-frame" aria-hidden="true"></div>
+  <div class="cam-off" id="cam-off">Camera is off</div>
+  <div class="cam-tag" aria-hidden="true">Live · not recorded</div>
+</div>
+
+<div id="meter" class="meter idle" hidden role="group" aria-label="Model prediction">
+  <div class="meter-top">
+    <div class="meter-say" id="meter-say"><span class="meter-lab"><span class="meter-mark" id="meter-mark" aria-hidden="true"></span><span class="meter-label" id="meter-label">—</span></span><span class="meter-pct" id="meter-pct"></span></div>
+  </div>
+  <div class="meter-bar" aria-hidden="true"><div class="meter-mask" id="meter-mask-l" style="left:0; right:50%"></div><div class="meter-mask" id="meter-mask-r" style="left:50%; right:0"></div><div class="meter-mid"></div><div class="meter-needle" id="meter-needle" style="left:50%"></div></div>
+  <div class="meter-ends" aria-hidden="true"><span class="a" id="meter-end-a">A</span><span class="b" id="meter-end-b">B</span></div>
+  <p class="meter-note" id="meter-note"></p>
+  <p class="sr-only" id="meter-sr" aria-live="polite"></p>
+</div>
+
+<div id="overlay" class="overlay" hidden role="status" aria-live="assertive">
+  <div class="overlay-box">
+    <h2 id="overlay-title">Learning from your examples…</h2>
+    <div class="progress" id="overlay-progress"><div></div></div>
+    <p class="lead" id="overlay-sub" style="margin:0 auto"></p>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden role="status"></div>
+<div id="live" class="sr-only" aria-live="polite"></div>
+
+<dialog class="staff" id="staff-dialog" aria-labelledby="staff-title">
+  <h2 id="staff-title" style="font-size:1.3em">Staff panel</h2>
+  <div class="stack">
+    <div class="field">
+      <label for="staff-camera">Camera</label>
+      <select id="staff-camera"><option value="">Default camera</option></select>
+      <p class="small">Choose the downward-facing camera for the table. Takes effect the next time the camera is turned on.</p>
+    </div>
+    <div class="field">
+      <span class="lbl">Today's tally (this browser only)</span>
+      <p class="small" id="staff-tally-text"></p>
+      <div class="row"><button type="button" class="btn btn-secondary" id="btn-staff-clear-tally">Clear today's tally</button></div>
+    </div>
+    <div class="field">
+      <span class="lbl">Status</span>
+      <p class="small" id="staff-status"></p>
+    </div>
+    <div class="field">
+      <label><input type="checkbox" id="staff-hints" checked> Show keyboard hints</label>
+    </div>
+    <div class="actions"><button type="button" class="btn btn-primary" id="btn-staff-close">Close</button></div>
+  </div>
+</dialog>
+
+<script src="config.js" defer></script>
+<script src="content/domains.js" defer></script>
+<script src="content/lessons.js" defer></script>
+<script src="content/challenge-cards.js" defer></script>
+<script src="content/series.js" defer></script>
+<script src="js/classifier.js" defer></script>
+<script src="js/vision.js" defer></script>
+<script src="js/counter.js" defer></script>
+<script src="js/challenge.js" defer></script>
+<script src="js/map.js" defer></script>
+<script src="app.js" defer></script>
+<script src="js/lab-vision.js" defer></script>
+<script src="js/lab-data.js" defer></script>
+<script src="js/lab-series.js" defer></script>
+</body>
+</html>
