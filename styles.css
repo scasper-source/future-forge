@@ -465,6 +465,16 @@ dialog.staff select { font: inherit; min-height: 48px; border-radius: var(--radi
 @keyframes fade-in { from { opacity: 0; } }
 .reveal-text { animation: fade-in 700ms ease-out 2300ms both; }
 
+/* ---------- Hook: composition ----------
+   One vertical rhythm that scales with the viewport's HEIGHT, so a short laptop
+   window breathes as well as a 43-inch display: gap instead of per-element margins,
+   and the two tallest pieces (title, Start) capped in vh as well as vw. */
+#screen-hook { gap: clamp(10px, 2.2vh, 30px); }
+#screen-hook > * { margin: 0; }
+#screen-hook .hero-title { line-height: 1.04; font-size: min(var(--fs-hero), 10.5vh); }
+#screen-hook .actions { margin-top: clamp(6px, 1.4vh, 18px); margin-bottom: clamp(4px, 1vh, 14px); }
+#screen-hook .btn-huge { min-height: min(calc(var(--control-h) * 1.5), 11vh); font-size: min(clamp(22px, 2.4vw + 6px, 54px), 4.8vh); }
+
 /* ---------- Hook: the attract field ---------- */
 #screen-hook { position: relative; overflow: hidden; }
 .attract-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.9; }
